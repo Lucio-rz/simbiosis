@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --card: #1e293b;
+  --card-foreground: #f8fafc;
+  --border: rgba(255,255,255,0.1);
+  --muted: #334155;
+  --muted-foreground: #94a3b8;
+  --input-background: #1e293b;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.bg-card { background-color: var(--card); }
+.text-foreground { color: var(--foreground); }
+.text-muted-foreground { color: var(--muted-foreground); }
+.bg-muted { background-color: var(--muted); }
+.border-border { border-color: var(--border); }
+.bg-input-background { background-color: var(--input-background); }
+.bg-background { background-color: var(--background); }
