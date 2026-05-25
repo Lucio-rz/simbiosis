@@ -2,7 +2,7 @@ import { Material } from '@/lib/types';
 
 export const mockMaterials: Material[] = [
   {
-    id: 1,
+    id: "1",
     title: "Pallets de madera en buen estado",
     category: "Madera",
     quantity: "50 unidades",
@@ -14,7 +14,7 @@ export const mockMaterials: Material[] = [
     featured: true,
   },
   {
-    id: 2,
+    id: "2",
     title: "Recortes de vidrio templado",
     category: "Vidrio",
     quantity: "30 kg",
@@ -26,7 +26,7 @@ export const mockMaterials: Material[] = [
     featured: true,
   },
   {
-    id: 3,
+    id: "3",
     title: "Plástico PET triturado",
     category: "Plástico",
     quantity: "200 kg",
@@ -37,7 +37,7 @@ export const mockMaterials: Material[] = [
     image: "https://images.unsplash.com/photo-1571727153934-b9e0059b7ab2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
   },
   {
-    id: 4,
+    id: "4",
     title: "Retales de tela",
     category: "Textil",
     quantity: "15 kg",
@@ -48,7 +48,7 @@ export const mockMaterials: Material[] = [
     image: "https://images.unsplash.com/photo-1534639077088-d702bcf685e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
   },
   {
-    id: 5,
+    id: "5",
     title: "Aserrín y viruta de madera",
     category: "Madera",
     quantity: "100 kg",
@@ -59,7 +59,7 @@ export const mockMaterials: Material[] = [
     image: "https://images.unsplash.com/photo-1617460055001-2167c227cb7b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
   },
   {
-    id: 6,
+    id: "6",
     title: "Cartón corrugado",
     category: "Papel",
     quantity: "80 kg",
@@ -70,7 +70,7 @@ export const mockMaterials: Material[] = [
     image: "https://images.unsplash.com/photo-1700165644892-3dd6b67b25bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
   },
   {
-    id: 7,
+    id: "7",
     title: "Chatarra de cobre",
     category: "Metal",
     quantity: "25 kg",
@@ -81,7 +81,7 @@ export const mockMaterials: Material[] = [
     image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
   },
   {
-    id: 8,
+    id: "8",
     title: "Restos de cerámica",
     category: "Cerámico",
     quantity: "40 kg",

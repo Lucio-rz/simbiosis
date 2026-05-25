@@ -4,12 +4,14 @@ import { Material } from '@/lib/types';
 import MaterialCard from './MaterialCard';
 import MaterialDetailModal from './MaterialDetailModal';
 import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
 
 interface MaterialsGridProps {
   materials: Material[];
+  loading?: boolean;
 }
 
-export default function MaterialsGrid({ materials }: MaterialsGridProps) {
+export default function MaterialsGrid({ materials, loading }: MaterialsGridProps) {
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
 
   return (
@@ -25,13 +27,22 @@ export default function MaterialsGrid({ materials }: MaterialsGridProps) {
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-white text-2xl font-semibold">Materiales disponibles</h2>
-              <p className="text-slate-400 text-sm mt-1">{materials.length} publicaciones encontradas</p>
+              {!loading && (
+                <p className="text-slate-400 text-sm mt-1">
+                  {materials.length} publicaciones encontradas
+                </p>
+              )}
             </div>
           </div>
 
-          {materials.length === 0 ? (
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-24 gap-4">
+              <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
+              <p className="text-slate-400">Cargando materiales...</p>
+            </div>
+          ) : materials.length === 0 ? (
             <div className="text-center py-24">
-              <div className="text-slate-400 text-6xl mb-4">📦</div>
+              <div className="text-6xl mb-4">📦</div>
               <h3 className="text-white text-xl mb-2">No se encontraron materiales</h3>
               <p className="text-slate-400">Probá con otros términos de búsqueda o categorías.</p>
             </div>

@@ -1,30 +1,90 @@
 'use client';
 
-import { X, Upload, Truck, Phone, Package, DollarSign, Clock } from 'lucide-react';
+import { X, Upload, Truck, Phone, Package, DollarSign, Clock, Loader2, CheckCircle } from 'lucide-react';
 import { useState } from 'react';
+import { createTransport } from '@/lib/queries';
 
 interface PublishTransportModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onPublished?: () => void;
 }
 
 const vehicleTypes = ['Camioneta', 'Camión pequeño', 'Camión mediano', 'Camión grande', 'Furgoneta', 'Utilitario'];
 const coverageZones = ['Bahía Blanca centro', 'Bahía Blanca y alrededores', 'Punta Alta - Bahía Blanca', 'Regional - Zona Sur', 'Provincial', 'Nacional'];
 
-export default function PublishTransportModal({ isOpen, onClose }: PublishTransportModalProps) {
+type Step = 'form' | 'saving' | 'success';
+
+export default function PublishTransportModal({ isOpen, onClose, onPublished }: PublishTransportModalProps) {
+  const [step, setStep] = useState<Step>('form');
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    companyName: '', zone: '', phone: '', email: '',
+    name: '', zone: '', phone: '', email: '',
     vehicleType: '', capacity: '', priceType: 'km', price: '', availability: '', description: '',
   });
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert('¡Servicio de transporte publicado exitosamente! (Demo)');
-    onClose();
-    setFormData({ companyName: '', zone: '', phone: '', email: '', vehicleType: '', capacity: '', priceType: 'km', price: '', availability: '', description: '' });
+    setError(null);
+    setStep('saving');
+
+    const result = await createTransport({
+      name: formData.name,
+      zone: formData.zone,
+      phone: formData.phone,
+      rating: 5.0,
+      sponsored: false,
+      image: 'https://images.unsplash.com/photo-1616432043562-3671ea2e5242?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400',
+    });
+
+    if (!result) {
+      setError('Hubo un error al publicar. Intentá de nuevo.');
+      setStep('form');
+      return;
+    }
+
+    setStep('success');
   };
+
+  const handleClose = () => {
+    setStep('form');
+    setError(null);
+    setFormData({ name: '', zone: '', phone: '', email: '', vehicleType: '', capacity: '', priceType: 'km', price: '', availability: '', description: '' });
+    onClose();
+  };
+
+  const handleSuccessClose = () => {
+    handleClose();
+    onPublished?.();
+  };
+
+  if (step === 'saving') return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div className="bg-slate-800 border border-white/10 rounded-2xl p-12 text-center shadow-2xl">
+        <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
+        </div>
+        <p className="text-white font-medium">Publicando servicio...</p>
+      </div>
+    </div>
+  );
+
+  if (step === 'success') return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div className="bg-slate-800 border border-white/10 rounded-2xl p-12 text-center shadow-2xl max-w-sm w-full">
+        <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+          <CheckCircle className="w-8 h-8 text-blue-400" />
+        </div>
+        <h3 className="text-white text-xl font-semibold mb-2">¡Servicio publicado!</h3>
+        <p className="text-slate-400 mb-6">Ya está visible para compradores y vendedores que necesiten transporte.</p>
+        <button onClick={handleSuccessClose} className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          Ver transportes
+        </button>
+      </div>
+    </div>
+  );
 
   const priceUnitLabel = { km: 'km', viaje: 'viaje', hora: 'hora', kg: 'kg' }[formData.priceType] || 'km';
 
@@ -38,27 +98,26 @@ export default function PublishTransportModal({ isOpen, onClose }: PublishTransp
             </div>
             <h2 className="font-semibold">Publicar servicio de transporte</h2>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+          <button onClick={handleClose} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 text-red-300 text-sm">{error}</div>
+          )}
+
           <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
-            <p className="text-sm text-blue-200">
-              <strong>Importante:</strong> Tu servicio será visible para compradores y vendedores que necesiten transportar materiales en la región.
-            </p>
+            <p className="text-sm text-blue-200">Tu servicio será visible para compradores y vendedores que necesiten transportar materiales en la región.</p>
           </div>
 
-          {/* Basic info */}
           <div>
-            <h3 className="text-white mb-4 flex items-center gap-2 font-medium">
-              <Truck className="w-5 h-5 text-blue-400" />Información básica
-            </h3>
+            <h3 className="text-white mb-4 flex items-center gap-2 font-medium"><Truck className="w-5 h-5 text-blue-400" />Información básica</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block mb-2 text-white text-sm">Nombre de la empresa o transportista *</label>
-                <input type="text" required value={formData.companyName} onChange={(e) => setFormData({ ...formData, companyName: e.target.value })} placeholder="Ej: Transporte Rápido BB" className="w-full px-4 py-3 bg-slate-700 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-slate-400" />
+                <input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Ej: Transporte Rápido BB" className="w-full px-4 py-3 bg-slate-700 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-slate-400" />
               </div>
               <div>
                 <label className="block mb-2 text-white text-sm">Zona de cobertura *</label>
@@ -70,11 +129,8 @@ export default function PublishTransportModal({ isOpen, onClose }: PublishTransp
             </div>
           </div>
 
-          {/* Contact */}
           <div>
-            <h3 className="text-white mb-4 flex items-center gap-2 font-medium">
-              <Phone className="w-5 h-5 text-emerald-400" />Información de contacto
-            </h3>
+            <h3 className="text-white mb-4 flex items-center gap-2 font-medium"><Phone className="w-5 h-5 text-emerald-400" />Contacto</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block mb-2 text-white text-sm">Teléfono *</label>
@@ -87,16 +143,13 @@ export default function PublishTransportModal({ isOpen, onClose }: PublishTransp
             </div>
           </div>
 
-          {/* Service details */}
           <div>
-            <h3 className="text-white mb-4 flex items-center gap-2 font-medium">
-              <Package className="w-5 h-5 text-purple-400" />Detalles del servicio
-            </h3>
+            <h3 className="text-white mb-4 flex items-center gap-2 font-medium"><Package className="w-5 h-5 text-purple-400" />Detalles del servicio</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block mb-2 text-white text-sm">Tipo de vehículo *</label>
                 <select required value={formData.vehicleType} onChange={(e) => setFormData({ ...formData, vehicleType: e.target.value })} className="w-full px-4 py-3 bg-slate-700 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
-                  <option value="">Seleccioná un tipo</option>
+                  <option value="">Seleccioná</option>
                   {vehicleTypes.map((t) => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
@@ -107,16 +160,13 @@ export default function PublishTransportModal({ isOpen, onClose }: PublishTransp
             </div>
           </div>
 
-          {/* Price */}
           <div>
-            <h3 className="text-white mb-4 flex items-center gap-2 font-medium">
-              <DollarSign className="w-5 h-5 text-emerald-400" />Tarifa
-            </h3>
+            <h3 className="text-white mb-4 flex items-center gap-2 font-medium"><DollarSign className="w-5 h-5 text-emerald-400" />Tarifa</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block mb-2 text-white text-sm">Tipo de tarifa *</label>
+                <label className="block mb-2 text-white text-sm">Tipo *</label>
                 <select required value={formData.priceType} onChange={(e) => setFormData({ ...formData, priceType: e.target.value })} className="w-full px-4 py-3 bg-slate-700 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
-                  <option value="km">Por kilómetro</option>
+                  <option value="km">Por km</option>
                   <option value="viaje">Por viaje</option>
                   <option value="hora">Por hora</option>
                   <option value="kg">Por kg</option>
@@ -133,41 +183,26 @@ export default function PublishTransportModal({ isOpen, onClose }: PublishTransp
             </div>
           </div>
 
-          {/* Availability */}
           <div>
-            <label className="block mb-2 text-white text-sm flex items-center gap-2">
-              <Clock className="w-4 h-4 text-orange-400" />Disponibilidad *
-            </label>
+            <label className="block mb-2 text-white text-sm flex items-center gap-2"><Clock className="w-4 h-4 text-orange-400" />Disponibilidad *</label>
             <input type="text" required value={formData.availability} onChange={(e) => setFormData({ ...formData, availability: e.target.value })} placeholder="Ej: Lunes a Viernes 8:00 - 18:00" className="w-full px-4 py-3 bg-slate-700 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-slate-400" />
           </div>
 
-          {/* Description */}
           <div>
-            <label className="block mb-2 text-white text-sm">Descripción del servicio *</label>
-            <textarea required value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Describí tu servicio, experiencia, áreas de especialización, etc." rows={4} className="w-full px-4 py-3 bg-slate-700 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-white placeholder-slate-400" />
+            <label className="block mb-2 text-white text-sm">Descripción *</label>
+            <textarea required value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Describí tu servicio, experiencia, áreas de especialización..." rows={3} className="w-full px-4 py-3 bg-slate-700 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-white placeholder-slate-400" />
           </div>
 
-          {/* Image upload */}
           <div>
-            <label className="block mb-2 text-white text-sm">Logo o imagen (opcional)</label>
-            <div className="border-2 border-dashed border-white/20 rounded-lg p-8 text-center hover:border-blue-500 transition-colors cursor-pointer bg-slate-700/50">
-              <Upload className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-              <p className="text-slate-400 mb-1">Arrastrá una imagen aquí o hacé clic</p>
-              <p className="text-sm text-slate-500">PNG o JPG, máximo 2MB</p>
+            <label className="block mb-2 text-white text-sm">Logo o imagen (próximamente)</label>
+            <div className="border-2 border-dashed border-white/10 rounded-lg p-6 text-center bg-slate-700/30 opacity-50 cursor-not-allowed">
+              <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+              <p className="text-slate-400 text-sm">La carga de imágenes estará disponible pronto</p>
             </div>
           </div>
 
-          {/* Advertising upsell */}
-          <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-4">
-            <h4 className="text-white mb-2 font-medium">💡 Destacá tu servicio</h4>
-            <p className="text-sm text-slate-300 mb-2">¿Querés que tu servicio aparezca destacado con el badge &quot;Publicidad&quot;?</p>
-            <button type="button" className="text-sm text-emerald-400 hover:text-emerald-300 underline font-semibold">
-              Conocer planes de publicidad
-            </button>
-          </div>
-
-          <div className="flex gap-4 pt-4 border-t border-white/10">
-            <button type="button" onClick={onClose} className="flex-1 px-6 py-3 border border-white/10 text-white rounded-lg hover:bg-slate-700 transition-colors">Cancelar</button>
+          <div className="flex gap-4 pt-2 border-t border-white/10">
+            <button type="button" onClick={handleClose} className="flex-1 px-6 py-3 border border-white/10 text-white rounded-lg hover:bg-slate-700 transition-colors">Cancelar</button>
             <button type="submit" className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg">Publicar servicio</button>
           </div>
         </form>
