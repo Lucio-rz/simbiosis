@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 
 const BASE_URL = 'https://simbiosis-woad.vercel.app';
 
@@ -53,6 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es">
       <body style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}>
+        <GoogleAnalytics />
         <AuthProvider>
           {children}
         </AuthProvider>
