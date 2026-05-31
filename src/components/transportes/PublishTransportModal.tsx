@@ -4,6 +4,7 @@ import { X, Upload, Truck, Phone, Package, DollarSign, Clock, Loader2, CheckCirc
 import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { createTransport } from '@/lib/queries';
+import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 
 interface PublishTransportModalProps {
@@ -20,6 +21,7 @@ type Step = 'form' | 'saving' | 'success';
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1616432043562-3671ea2e5242?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400';
 
 export default function PublishTransportModal({ isOpen, onClose, onPublished }: PublishTransportModalProps) {
+  const { user } = useAuth();
   const [step, setStep] = useState<Step>('form');
   const [error, setError] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -82,6 +84,12 @@ export default function PublishTransportModal({ isOpen, onClose, onPublished }: 
       imageUrl = url;
     }
 
+    if (!user) {
+      setError('Debés iniciar sesión para publicar.');
+      setStep('form');
+      return;
+    }
+
     const result = await createTransport({
       name: formData.name,
       zone: formData.zone,
@@ -89,7 +97,7 @@ export default function PublishTransportModal({ isOpen, onClose, onPublished }: 
       rating: 5.0,
       sponsored: false,
       image: imageUrl,
-    });
+    }, user.id);
 
     if (!result) {
       setError('Hubo un error al publicar. Intentá de nuevo.');

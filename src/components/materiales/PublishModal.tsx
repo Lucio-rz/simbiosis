@@ -4,6 +4,7 @@ import { X, Upload, Loader2, CheckCircle, ImageIcon, Trash2 } from 'lucide-react
 import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { createMaterial } from '@/lib/queries';
+import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 
 interface PublishModalProps {
@@ -25,6 +26,8 @@ export default function PublishModal({ isOpen, onClose, onPublished }: PublishMo
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { user } = useAuth();
 
   const [formData, setFormData] = useState({
     title: '', category: '', quantity: '', price: '',
@@ -103,11 +106,17 @@ export default function PublishModal({ isOpen, onClose, onPublished }: PublishMo
       imageUrl = url;
     }
 
+    if (!user) {
+      setError('Debés iniciar sesión para publicar.');
+      setStep('form');
+      return;
+    }
+
     const result = await createMaterial({
       ...formData,
       featured: false,
       image: imageUrl,
-    });
+    }, user.id);
 
     if (!result) {
       setError('Hubo un error al publicar. Revisá tu conexión e intentá de nuevo.');

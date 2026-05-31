@@ -31,34 +31,26 @@ export default function HomePage() {
   }, [searchQuery, selectedCategory]);
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      fetchMaterials();
-    }, 300); // debounce de 300ms para la búsqueda
+    const timeout = setTimeout(() => fetchMaterials(), 300);
     return () => clearTimeout(timeout);
   }, [fetchMaterials]);
-
-  const handleMaterialPublished = () => {
-    setIsPublishModalOpen(false);
-    fetchMaterials(); // recarga la lista después de publicar
-  };
 
   return (
     <>
       <PublishModal
         isOpen={isPublishModalOpen}
         onClose={() => setIsPublishModalOpen(false)}
-        onPublished={handleMaterialPublished}
+        onPublished={() => { setIsPublishModalOpen(false); fetchMaterials(); }}
       />
       <Navbar onPublish={() => setIsPublishModalOpen(true)} />
       <main>
         <Hero />
         <SearchBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
         <Categories selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} />
-        <MaterialsGrid materials={materials} loading={loading} />
+        <MaterialsGrid materials={materials} loading={loading} onRefresh={fetchMaterials} />
         <TransportSection />
         <HowItWorks />
       </main>
-      <Footer />
     </>
   );
 }

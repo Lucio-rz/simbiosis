@@ -9,6 +9,7 @@ export interface Material {
   description: string;
   image?: string;
   featured?: boolean;
+  user_id?: string;
   created_at?: string;
 }
 
@@ -20,5 +21,6 @@ export interface TransportProvider {
   rating: number;
   sponsored: boolean;
   image: string;
+  user_id?: string;
   created_at?: string;
 }

@@ -5,14 +5,21 @@ import MaterialCard from './MaterialCard';
 import MaterialDetailModal from './MaterialDetailModal';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
+import { deleteMaterial } from '@/lib/queries';
 
 interface MaterialsGridProps {
   materials: Material[];
   loading?: boolean;
+  onRefresh?: () => void;
 }
 
-export default function MaterialsGrid({ materials, loading }: MaterialsGridProps) {
+export default function MaterialsGrid({ materials, loading, onRefresh }: MaterialsGridProps) {
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
+
+  const handleDelete = async (id: string) => {
+    const ok = await deleteMaterial(id);
+    if (ok) onRefresh?.();
+  };
 
   return (
     <>
@@ -28,9 +35,7 @@ export default function MaterialsGrid({ materials, loading }: MaterialsGridProps
             <div>
               <h2 className="text-white text-2xl font-semibold">Materiales disponibles</h2>
               {!loading && (
-                <p className="text-slate-400 text-sm mt-1">
-                  {materials.length} publicaciones encontradas
-                </p>
+                <p className="text-slate-400 text-sm mt-1">{materials.length} publicaciones encontradas</p>
               )}
             </div>
           </div>
@@ -53,6 +58,7 @@ export default function MaterialsGrid({ materials, loading }: MaterialsGridProps
                   key={material.id}
                   material={material}
                   onClick={() => setSelectedMaterial(material)}
+                  onDelete={handleDelete}
                 />
               ))}
             </div>

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AuthProvider } from "@/context/AuthContext";
 
-const BASE_URL = 'https://simbiosis-woad.vercel.app'; // ← cambiá por tu URL real de Vercel
+const BASE_URL = 'https://simbiosis-woad.vercel.app';
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
@@ -26,14 +27,7 @@ export const metadata: Metadata = {
     title: "SIMBIOSIS - Marketplace de Materiales Reciclados",
     description:
       "Comprá y vendé materiales sobrantes. Conectamos empresas, talleres y emprendedores para dar nueva vida a los materiales.",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "SIMBIOSIS Marketplace",
-      },
-    ],
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "SIMBIOSIS Marketplace" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -52,18 +46,17 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
     },
   },
-  alternates: {
-    canonical: BASE_URL,
-  },
-  verification: {
-    google: '1aNCz3wE0Escj6ftI9nvR7gFDZwF7VZjkazkCo4xOmY',
-  },
+  alternates: { canonical: BASE_URL },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es">
-      <body style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}>{children}</body>
+      <body style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </body>
     </html>
   );
 }

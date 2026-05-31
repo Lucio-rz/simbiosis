@@ -1,13 +1,32 @@
+'use client';
+
 import Image from 'next/image';
-import { MapPin, User, Package, DollarSign, Star } from 'lucide-react';
+import { MapPin, User, Package, DollarSign, Star, Trash2 } from 'lucide-react';
 import { Material } from '@/lib/types';
+import { useAuth } from '@/context/AuthContext';
+import { isAdmin } from '@/lib/queries';
 
 interface MaterialCardProps {
   material: Material;
   onClick?: () => void;
+  onDelete?: (id: string) => void;
 }
 
-export default function MaterialCard({ material, onClick }: MaterialCardProps) {
+export default function MaterialCard({ material, onClick, onDelete }: MaterialCardProps) {
+  const { user } = useAuth();
+
+  const canDelete = user && (
+    isAdmin(user.email) ||
+    material.user_id === user.id
+  );
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm('¿Estás seguro de que querés eliminar esta publicación?')) {
+      onDelete?.(material.id);
+    }
+  };
+
   return (
     <div
       className={`bg-white border rounded-2xl overflow-hidden hover:shadow-xl transition-all hover:scale-[1.02] cursor-pointer ${
@@ -37,7 +56,18 @@ export default function MaterialCard({ material, onClick }: MaterialCardProps) {
             <Package className="w-20 h-20 text-slate-400" />
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+
+        {/* Botón eliminar */}
+        {canDelete && (
+          <button
+            onClick={handleDelete}
+            className="absolute top-2 right-2 p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-lg transition-colors opacity-0 group-hover:opacity-100"
+            title="Eliminar publicación"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       <div className="p-5">
